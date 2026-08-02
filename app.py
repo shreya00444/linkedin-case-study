@@ -286,7 +286,7 @@ with tab2:
         'trend_label': 'Trend'
     })
     st.dataframe(
-        display_region.style.applymap(color_trend, subset=['Trend']),
+        display_region.style.map(color_trend, subset=['Trend']),
         use_container_width=True,
         hide_index=True
     )
@@ -299,7 +299,7 @@ with tab2:
         'trend_label': 'Trend'
     })
     st.dataframe(
-        display_segment.style.applymap(color_trend, subset=['Trend']),
+        display_segment.style.map(color_trend, subset=['Trend']),
         use_container_width=True,
         hide_index=True
     )
