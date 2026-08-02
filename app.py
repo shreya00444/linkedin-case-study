@@ -222,6 +222,7 @@ with tab2:
     st.markdown('<p class="section-title">Forecast Accuracy · 2024-Q3 and 2024-Q4</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-desc">Weighted rep forecasts (pipeline × likelihood %) compared against actual historical bookings. </p>', unsafe_allow_html=True)
 
+    col1, col2, col3 = st.columns(3)
     with col1:
         selected_quarter = st.selectbox("Quarter", ["All", "2024-Q3", "2024-Q4"])
     with col2:
@@ -411,10 +412,10 @@ with tab3:
         if stale_count > 0:
             st.caption(f"⚠️ {stale_count} of {len(active_display)} active deals have past close dates and require CRM update.")
 
-    if insights.get('accuracy'):
+    if insights.get('coverage'):
         st.markdown("---")
         with st.expander("Insights", expanded=False):
-            st.markdown(f"💡 {insights.get('accuracy')}")
+            st.markdown(f"💡 {insights.get('coverage')}")
 
     with st.expander("Validation checks"):
         for v in cov_validations:
@@ -432,6 +433,8 @@ with tab4:
     st.markdown('<p class="section-title">Rep vs CRM Pipeline Gap</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-desc">Where rep forecast submissions disagree with CRM opportunity values. </p>', unsafe_allow_html=True)
 
+    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
     with col1:
         gap_filter = st.selectbox("Filter by direction", ["All", "Rep Higher", "Rep Lower", "Aligned"], key="gap_dir")
     with col2:
@@ -481,10 +484,10 @@ with tab4:
         height=500
     )
 
-    if insights.get('coverage'):
+    if insights.get('gap'):
         st.markdown("---")
         with st.expander("Insights", expanded=False):
-            st.markdown(f"💡 {insights.get('coverage')}")
+            st.markdown(f"💡 {insights.get('gap')}")
 
     with st.expander("Validation checks"):
         for v in gap_validations:
@@ -494,11 +497,6 @@ with tab4:
                 st.warning(f"⚠️ {v['check']}: {v['actual']}")
             else:
                 st.error(f"❌ {v['check']}: {v['actual']}")
-
-    if insights.get('gap'):
-        st.markdown("---")
-        with st.expander("Insights", expanded=False):
-            st.markdown(f"💡 {insights.get('gap')}")
 
 
 
