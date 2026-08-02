@@ -6,6 +6,10 @@ import os
 # File path to Excel data
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "case_interview_data.xlsx")
 
+# Reference date - set to Q2 2025 to match dataset timeframe
+# In production this would use datetime.today()
+REFERENCE_DATE = pd.Timestamp('2025-04-01')
+
 # Scalable test data exclusion list
 KNOWN_TEST_REPS = ['REP-099', 'REP-000', 'REP-999']
 KNOWN_TEST_ACCOUNTS = ['ACC-999', 'ACC-000', 'ACC-TEST']
@@ -76,10 +80,11 @@ def clean_opportunities(df):
             })
 
     # 5. Flag stale deals
-    today = datetime.today()
+    # Using reference date of 2025-04-01 to match dataset timeframe
+    # In production this would use datetime.today()
     df['close_date'] = pd.to_datetime(df['close_date'], errors='coerce')
     stale_mask = (
-        (df['close_date'] < today) &
+        (df['close_date'] < REFERENCE_DATE) &
         (df['is_closed_won'] == 0) &
         (df['stage'] != 'Closed Lost') &
         (df['close_date'].notnull())

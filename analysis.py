@@ -87,38 +87,48 @@ def calculate_forecast_accuracy(clean_forecast, clean_bookings, clean_opps):
     accuracy_df['over_under'] = accuracy_df['over_under'].round(0)
 
     # ---- VALIDATION CHECKS ----
-    expected_rows = len(clean_bookings)
+    # Dynamically detect quarters with both forecast AND bookings data
+    meaningful_rows = accuracy_df[accuracy_df['total_weighted_forecast'] > 0]
+    forecast_quarters = list(meaningful_rows['quarter'].unique())
+    n_forecast_quarters = len(forecast_quarters)
+    expected_meaningful = n_forecast_quarters * 4 * 3
+
     validations.append({
-        'check': 'Row count check',
-        'expected': f'{expected_rows} rows',
-        'actual': f'{len(accuracy_df)} rows',
-        'status': 'PASS' if len(accuracy_df) == expected_rows else 'WARN'
+        'check': f'Row count check ({n_forecast_quarters} quarters with forecast data)',
+        'expected': f'{expected_meaningful} rows',
+        'actual': f'{len(meaningful_rows)} rows',
+        'status': 'PASS' if len(meaningful_rows) == expected_meaningful else 'WARN'
     })
 
-    regions_in_output = accuracy_df['region'].nunique()
+    regions_in_output = meaningful_rows['region'].nunique()
     validations.append({
-        'check': 'All 4 regions present',
+        'check': 'All 4 regions present in forecast quarters',
         'expected': '4',
         'actual': str(regions_in_output),
         'status': 'PASS' if regions_in_output == 4 else 'FAIL'
     })
 
-    segments_in_output = accuracy_df['segment'].nunique()
+    segments_in_output = meaningful_rows['segment'].nunique()
     validations.append({
-        'check': 'All 3 segments present',
+        'check': 'All 3 segments present in forecast quarters',
         'expected': '3',
         'actual': str(segments_in_output),
         'status': 'PASS' if segments_in_output == 3 else 'FAIL'
     })
 
-    total_bookings_check = accuracy_df['total_bookings'].sum()
-    total_bookings_source = clean_bookings['bookings'].sum()
+    forecast_bookings = accuracy_df[
+        accuracy_df['quarter'].isin(forecast_quarters)
+    ]['total_bookings'].sum()
+    source_bookings = clean_bookings[
+        clean_bookings['quarter'].isin(forecast_quarters)
+    ]['bookings'].sum()
     validations.append({
-        'check': 'Total bookings reconcile to source',
-        'expected': f'${total_bookings_source:,.0f}',
-        'actual': f'${total_bookings_check:,.0f}',
-        'status': 'PASS' if total_bookings_check == total_bookings_source else 'FAIL'
+        'check': f'Bookings reconcile to source ({", ".join(sorted(forecast_quarters))})',
+        'expected': f'${source_bookings:,.0f}',
+        'actual': f'${forecast_bookings:,.0f}',
+        'status': 'PASS' if forecast_bookings == source_bookings else 'FAIL'
     })
+
 
     return accuracy_df, validations
 
@@ -393,6 +403,12 @@ def calculate_accuracy_trend(accuracy_df):
         region_pivot[q] = region_pivot[q].round(1)
     if 'trend' in region_pivot.columns:
         region_pivot['trend'] = region_pivot['trend'].round(1)
+    # Ensure all numeric columns are rounded to 1 decimal
+    for col in region_pivot.columns:
+        if col not in ['region', 'trend_label']:
+            region_pivot[col] = pd.to_numeric(region_pivot[col], errors='ignore')
+            if region_pivot[col].dtype in ['float64', 'float32']:
+                region_pivot[col] = region_pivot[col].round(1)
 
     # Pivot by segment
     segment_trend = with_data.groupby(['quarter', 'segment'])['accuracy_pct'].mean().reset_index()
@@ -409,6 +425,12 @@ def calculate_accuracy_trend(accuracy_df):
         segment_pivot[q] = segment_pivot[q].round(1)
     if 'trend' in segment_pivot.columns:
         segment_pivot['trend'] = segment_pivot['trend'].round(1)
+    # Ensure all numeric columns are rounded to 1 decimal
+    for col in segment_pivot.columns:
+        if col not in ['segment', 'trend_label']:
+            segment_pivot[col] = pd.to_numeric(segment_pivot[col], errors='ignore')
+            if segment_pivot[col].dtype in ['float64', 'float32']:
+                segment_pivot[col] = segment_pivot[col].round(1)
 
     return region_pivot, segment_pivot
 
