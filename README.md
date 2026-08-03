@@ -2,7 +2,7 @@ LinkedIn Talent Solutions — Q3 2025 Forecast & Planning Tool
 
 A lightweight prototype that automates forecast accuracy analysis and Q3 pipeline planning by unifying CRM pipeline, historical bookings, and rep forecast submissions into a single repeatable pipeline.
 
-Live Demo: [Add Streamlit URL]
+Live Demo: https://linkedin-case-study.streamlit.app
 Repo: https://github.com/shreya00444/linkedin-case-study
 
 ---
@@ -64,7 +64,7 @@ Open http://localhost:8501 in your browser.
 
 OR
 
-Public URL: [Add Streamlit URL]
+Public URL: https://linkedin-case-study.streamlit.app
 
 Note: The Insights feature displays hardcoded findings for this prototype. In production it would require an LLM API key and generate dynamic insights from live analysis results via the LLM API.
 
